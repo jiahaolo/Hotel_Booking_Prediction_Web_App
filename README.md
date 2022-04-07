@@ -5,10 +5,12 @@ Developer: Jia Hao Lo
 ## Project Charter
 
 ### Vision
-The project aims to predict the cancellation of hotel booking for the hotels  to carry out demand prediction, customer retention and profit maximization. The key drivers for booking cancelation will also be identified for the hotel to understand the patterns and reasons for cancellation, and act accordingly based on the insights.
+The project aims to predict the cancellation of hotel booking for the hotels to carry out demand prediction, customer retention and profit maximization. The hotels can utilize the prediction to optimize their business strategies and be prepared for the upcoming cancellations. The key drivers for booking cancelation will also be identified for the hotel to understand the patterns and reasons for cancellation, and act accordingly based on the insights.
 
 ### Mission
-The project will build a predictive model to predict whether a hotel booking will be cancelled based on details of the booking provided by the user, and identify key drivers of hotel booking cancellation. The data is extracted from Hotel Booking Demand Datasets written by Nuno Antonio, Ana de Almeida and Luis Nunes.
+The project will build a predictive model to predict whether a hotel booking will be cancelled based on details of the booking provided by the user, and identify key drivers of hotel booking cancellation. Different machine learning models will be compared against each other based on selected evaluation metric to select the model with best performance in predicting cancellation.
+
+The data is extracted from Hotel Booking Demand Datasets written by Nuno Antonio, Ana de Almeida and Luis Nunes.
 
 Source:
 
