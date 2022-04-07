@@ -1,4 +1,5 @@
 # MSiA423 Hotel Booking Cancellation Prediction
+======
 
 Developer: Jia Hao Lo
 
@@ -11,6 +12,7 @@ The project aims to predict the cancellation of hotel booking for the hotels  to
 The project will build a predictive model to predict whether a hotel booking will be cancelled based on details of the booking provided by the user, and identify key drivers of hotel booking cancellation. The data is extracted from Hotel Booking Demand Datasets written by Nuno Antonio, Ana de Almeida and Luis Nunes.
 
 Source:
+
 Nuno Antonio, Ana de Almeida, Luis Nunes,
 Hotel booking demand datasets,
 Data in Brief,
@@ -26,13 +28,14 @@ Abstract: This data article describes two datasets with hotel demand data. One o
 
 ### Success Criteria
 
-Machine Learning Performance Metric:
+1. Machine Learning Performance Metric:
 
 F1-score will be used as the model evaluation metric. The final model with cross-validation F1-score more than 0.9 will be selected for deployment.
 
-Business Outcome Metric:
+2. Business Outcome Metric:
 
-*Cost reduction from optimizing wasted resources on cancelled booking
-*Revenue increment from preventing cancellation by addressing the key drivers accordingly.
+Cost reduction from optimizing wasted resources on cancelled booking
+
+Revenue increment from preventing cancellation by addressing the key drivers accordingly.
 
 
