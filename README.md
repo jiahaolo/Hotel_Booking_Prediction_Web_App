@@ -1,5 +1,4 @@
 # MSiA423 Hotel Booking Cancellation Prediction
-======
 
 Developer: Jia Hao Lo
 
