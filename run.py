@@ -3,15 +3,16 @@
 import argparse
 import logging.config
 
+
 from config.flaskconfig import SQLALCHEMY_DATABASE_URI
-from src.add_songs import create_db, add_song
+from src.add_bookings import create_db, BookingManager
 
 logging.config.fileConfig('config/logging/local.conf')
-logger = logging.getLogger('penny-lane-pipeline')
+logger = logging.getLogger()
 
 if __name__ == '__main__':
 
-    # Add parsers for both creating a database and adding songs to it
+    # Add parsers for both creating a database and adding bookings to it
     parser = argparse.ArgumentParser(
         description="Create and/or add data to database")
     subparsers = parser.add_subparsers(dest='subparser_name')
@@ -21,7 +22,7 @@ if __name__ == '__main__':
                                       description="Create database")
     sp_create.add_argument("--engine_string", default=SQLALCHEMY_DATABASE_URI,
                            help="SQLAlchemy connection URI for database")
-
+    '''
     # Sub-parser for ingesting new data
     sp_ingest = subparsers.add_parser("ingest",
                                       description="Add data to database")
@@ -34,12 +35,14 @@ if __name__ == '__main__':
     sp_ingest.add_argument("--engine_string",
                            default='sqlite:///data/tracks.db',
                            help="SQLAlchemy connection URI for database")
-
+    '''
     args = parser.parse_args()
     sp_used = args.subparser_name
     if sp_used == 'create_db':
+        print(SQLALCHEMY_DATABASE_URI)
         create_db(args.engine_string)
-    elif sp_used == 'ingest':
-        add_song(args)
+    #elif sp_used == 'ingest':
+    #    bm = BookingManager(args.engine_string)
+    #    bm.add_booking(args)
     else:
         parser.print_help()
