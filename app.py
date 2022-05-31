@@ -1,101 +1,204 @@
 import logging.config
-import sqlite3
 import traceback
+import sys
 
-import sqlalchemy.exc
+import yaml
+import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for
 
 # For setting up the Flask-SQLAlchemy database session
-from src.add_songs import Tracks, TrackManager
+from config.flaskconfig import HOTEL_TYPE, MODEL_PATH
+from src.add_bookings import BookingManager
+from src.predict import predict
 
 # Initialize the Flask application
-app = Flask(__name__, template_folder="app/templates",
-            static_folder="app/static")
+app = Flask(__name__, template_folder='app/templates',
+            static_folder='app/static')
 
 # Configure flask app from flask_config.py
 app.config.from_pyfile('config/flaskconfig.py')
 
 # Define LOGGING_CONFIG in flask_config.py - path to config file for setting
 # up the logger (e.g. config/logging/local.conf)
-logging.config.fileConfig(app.config["LOGGING_CONFIG"])
-logger = logging.getLogger(app.config["APP_NAME"])
+logging.config.fileConfig(app.config['LOGGING_CONFIG'])
+logger = logging.getLogger(app.config['APP_NAME'])
 logger.debug(
     'Web app should be viewable at %s:%s if docker run command maps local '
     'port to the same port as configured for the Docker container '
     'in config/flaskconfig.py (e.g. `-p 5000:5000`). Otherwise, go to the '
     'port defined on the left side of the port mapping '
     '(`i.e. -p THISPORT:5000`). If you are running from a Windows machine, '
-    'go to 127.0.0.1 instead of 0.0.0.0.', app.config["HOST"]
-    , app.config["PORT"])
+    'go to 127.0.0.1 instead of 0.0.0.0.', app.config['HOST'], app.config['PORT'])
 
 # Initialize the database session
-track_manager = TrackManager(app)
+booking_manager = BookingManager(app)
+
+# Reading yaml file
+logger.info('Reading configuration file')
+try:
+    with open('./config/config.yaml', 'r') as ymlfile:
+        cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+except FileNotFoundError:
+    logger.error('Configuration file not found')
+    sys.exit(1)
+except TypeError:
+    logger.error('Please check the type of the object')
+    sys.exit(1)
+except AttributeError:
+    logger.error('Please check the attribute of the object')
+    sys.exit(1)
+logger.info('Configuration file read')
 
 
-@app.route('/')
+@app.route('/', methods=['GET', 'POST'])
 def index():
-    """Main view that lists songs in the database.
+    '''Main view that enables user to add bookings.
 
-    Create view into index page that uses data queried from Track database and
-    inserts it into the app/templates/index.html template.
+    Create view into index page that user adds new bookings.
 
     Returns:
         Rendered html template
 
+    '''
+    if request.method == 'GET':
+        try:
+            logger.debug('Index page accessed')
+            return render_template('index.html', hotel_type=HOTEL_TYPE)
+        except Exception as e:
+            traceback.print_exc()
+            logger.warning('Hotel booking information not found.')
+            return render_template('error.html')
+    """
+    elif request.method == 'POST':
+        try:
+            hotel = request.form['hotel_type']
+            arrival_day_of_month = request.form['arrival_day_of_month']
+            arrival_week_number = request.form['arrival_week_number']
+            reservation_day = request.form['reservation_day']
+            reservation_month = request.form['reservation_month']
+            reservation_weekday = request.form['reservation_weekday']
+            lead_time = request.form['lead_time']
+            stays_in_week_nights = request.form['stays_in_week_nights']
+            stays_in_weekend_nights = request.form['stays_in_weekend_nights']
+            total_of_special_requests = request.form['total_of_special_requests']
+            market_segment = request.form['market_segment']
+
+            new_booking_df = pd.DataFrame()
+            if request.form['hotel'] == 'City Hotel':
+                new_booking_df['hotel'] = 1
+            else:
+                new_booking_df['hotel'] = 0
+            new_booking_df['arrival_date_day_of_month'] = request.form['arrival_date_day_of_month']
+            new_booking_df['arrival_date_week_number'] = request.form['arrival_date_week_number']
+            new_booking_df['reservation_day'] = request.form['reservation_day']
+            new_booking_df['reservation_month'] = request.form['reservation_month']
+            new_booking_df['reservation_weekday'] = request.form['reservation_weekday']
+            new_booking_df['lead_time'] = request.form['lead_time']
+            new_booking_df['stays_in_week_nights'] = request.form['stays_in_week_nights']
+            new_booking_df['stays_in_weekend_nights'] = request.form['stays_in_weekend_nights']
+            new_booking_df['total_of_special_requests'] = request.form['total_of_special_requests']
+            new_booking_df['market_segment'] = request.form['market_segment']
+
+            prediction, prediction_prob = predict(
+                new_booking_df, cfg['predict']['predict'])
+
+            url_for_post = url_for(
+                'response', prediction=prediction, prediction_prob=prediction_prob)
+
+            logger.info('Prediction for new booking from %s: %s',
+                        request.form['hotel'], prediction)
+            return redirect(url_for_post)
+        except Exception as e:
+            traceback.print_exc()
+            logger.warning('Hotel booking information not found.')
+            return render_template('error.html')
     """
 
-    try:
-        tracks = track_manager.session.query(Tracks).limit(
-            app.config["MAX_ROWS_SHOW"]).all()
-        logger.debug("Index page accessed")
-        return render_template('index.html', tracks=tracks)
-    except sqlite3.OperationalError as e:
-        logger.error(
-            "Error page returned. Not able to query local sqlite database: %s."
-            " Error: %s ",
-            app.config['SQLALCHEMY_DATABASE_URI'], e)
-        return render_template('error.html')
-    except sqlalchemy.exc.OperationalError as e:
-        logger.error(
-            "Error page returned. Not able to query MySQL database: %s. "
-            "Error: %s ",
-            app.config['SQLALCHEMY_DATABASE_URI'], e)
-        return render_template('error.html')
-    except:
-        traceback.print_exc()
-        logger.error("Not able to display tracks, error page returned")
-        return render_template('error.html')
+@app.route('/predict.html/<prediction>/<prediction_prob>', methods=['GET', 'POST'])
+def response(prediction, prediction_prob):
+    '''View that displays the prediction.
+
+    Create view into index page that user adds new bookings.
+
+    Returns:
+        Rendered html template
+
+    '''
+    if request.method == 'GET':
+        try:
+            logger.debug('Index page accessed')
+            return render_template('predict.html', prediction=prediction, prediction_prob=prediction_prob)
+        except Exception as e:
+            traceback.print_exc()
+            logger.warning('Hotel booking information not found.')
+            return render_template('error.html')
+    elif request.method == 'POST':
+        return "POST"
 
 
-@app.route('/add', methods=['POST'])
+@app.route('/predict', methods=['POST', 'GET'])
 def add_entry():
-    """View that process a POST with new song input
+    '''View that process a POST with new booking input
 
     Returns:
         redirect to index page
-    """
+    '''
 
-    try:
-        track_manager.add_track(artist=request.form['artist'],
-                                album=request.form['album'],
-                                title=request.form['title'])
-        logger.info("New song added: %s by %s", request.form['title'],
-                    request.form['artist'])
-        return redirect(url_for('index'))
-    except sqlite3.OperationalError as e:
-        logger.error(
-            "Error page returned. Not able to add song to local sqlite "
-            "database: %s. Error: %s ",
-            app.config['SQLALCHEMY_DATABASE_URI'], e)
-        return render_template('error.html')
-    except sqlalchemy.exc.OperationalError as e:
-        logger.error(
-            "Error page returned. Not able to add song to MySQL database: %s. "
-            "Error: %s ",
-            app.config['SQLALCHEMY_DATABASE_URI'], e)
-        return render_template('error.html')
+    if request.method == 'GET':
+        return 'Please visit the homepage to add bookings and get predictions.'
+
+    if request.method == 'POST':
+
+        try:
+            booking_manager.add_booking(hotel=request.form['hotel_type'],
+                                        arrival_date_day_of_month=request.form['arrival_day_of_month'],
+                                        arrival_date_week_number=request.form['arrival_week_number'],
+                                        reservation_day=request.form['reservation_day'],
+                                        reservation_month=request.form['reservation_month'],
+                                        reservation_weekday=request.form['reservation_weekday'],
+                                        lead_time=request.form['lead_time'],
+                                        stays_in_week_nights=request.form['stays_in_week_nights'],
+                                        stays_in_weekend_nights=request.form['stays_in_weekend_nights'],
+                                        total_of_special_requests=request.form['total_of_special_requests'],
+                                        market_segment=request.form['market_segment'])
+            logger.info('New booking from %s added', request.form['hotel_type'])
+
+            booking_dict = {
+                'hotel': request.form['hotel_type'],
+                'arrival_date_day_of_month': request.form['arrival_day_of_month'],
+                'arrival_date_week_number': request.form['arrival_week_number'],
+                'day': request.form['reservation_day'],
+                'month': request.form['reservation_month'],
+                'weekday': request.form['reservation_weekday'],
+                'lead_time': request.form['lead_time'],
+                'stays_in_week_nights': request.form['stays_in_week_nights'],
+                'stays_in_weekend_nights': request.form['stays_in_weekend_nights'],
+                'total_of_special_requests': request.form['total_of_special_requests'],
+                'market_segment': request.form['market_segment']
+            }
+
+            logger.debug(booking_dict)
+
+            booking_df = pd.DataFrame(booking_dict, index=[0]) 
+            if booking_df['hotel'][0] == 'City Hotel':
+                booking_df['hotel'] = 1
+            else:
+                booking_df['hotel'] = 0
+
+            prediction, prediction_prob = predict(
+                booking_df, **cfg['predict']['predict'])
+
+            url_for_post = url_for(
+                'response', prediction=prediction, prediction_prob=prediction_prob[0][1])
+
+            return redirect(url_for_post)
+
+        except Exception as e:
+            traceback.print_exc()
+            logger.warning('Hotel booking information not found.')
+            return render_template('error.html')
 
 
 if __name__ == '__main__':
-    app.run(debug=app.config["DEBUG"], port=app.config["PORT"],
-            host=app.config["HOST"])
+    app.run(debug=app.config['DEBUG'], port=app.config['PORT'],
+            host=app.config['HOST'])

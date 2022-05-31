@@ -1,0 +1,44 @@
+<html lang="en"></html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      h1 {
+        text-align: center;
+        color: #424242;
+      }
+      p {
+      text-align: center;
+      font-weight: bold;
+      color: #424242;
+      }
+      div {text-align: center}
+      body {
+        background-color: #F2F2F2
+      }
+    </style>
+
+    <link href="static/basic.css" rel="stylesheet">
+
+    <title>Prediction Results</title>
+  </head>
+<html lang="en">
+    <body>
+        <h1>Prediction Results for the Booking</h1>
+    
+        <hr/>
+    
+        <p>
+          Probability of Booking Cancellation: {{ prediction_prob }}%
+        </p>
+    
+        <p>
+          Conclusion: {{ prediction }}
+        
+        <br/>
+        <div>
+          <a href="{{ url_for('index') }}" style = "text-align:center;">Return to the Main Menu to Get More Predictions</a>
+        </div>
+        <br/>
+</html>

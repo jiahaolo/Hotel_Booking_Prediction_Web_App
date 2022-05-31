@@ -3,41 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <link href="static/basic.css" rel="stylesheet">
+
+   <title>Hotel Booking Cancellation Prediction App</title>
 </head>
 
 <body>
-    <h3>
-         <a href = "{{ url_for('index') }}">Penny Lane Music Recommender</a>
-    </h3>
+   <h3>
+         <a href = "{{ url_for('index') }}">Booking Cancellation Predictor</a>
+   </h3>
 
-    <hr/>
-    <table>
-         <thead>
-            <tr>
-               <th>Title</th>
-               <th>Artist</th>
-               <th>Album</th>
-            </tr>
-         </thead>
+   <h4>
+      Please enter the following information to predict the cancellation rate of a booking:
+   </h4>
 
-         <tbody>
-            {% for track in tracks %}
-               <tr>
-                   <td>{{ track.title }}</td>
-                   <td>{{ track.artist }}</td>
-                   <td>{{ track.album }}</td>
-               </tr>
-            {% endfor %}
-         </tbody>
-      </table>
-      <form action="{{ url_for('add_entry') }}" method=post class=add-entry>
-      <dl>
-        <input type=text size=15 name=title placeholder="Title">
-        <input type=text size=15 name=artist placeholder="Artist">
-        <input type=text size=15 name=album placeholder="Album">
-        <input type=submit value=Add>
-      </dl>
-    </form>
+   <form action="{{ url_for('add_entry') }}" method=post class=form>
+   <dl>
+      <label>1. Please enter the hotel type: </label>
+      {% for hotel in hotel_type %}
+      <input type="radio" id="{{ hotel }}" name="hotel_type" value="{{ hotel }}"/>
+      <label for="{{ hotel }}">{{ hotel }}</label>
+      {% endfor %}
+   <br />
+
+   <br />
+          <label for="arrival_day_of_month">2. Please enter the arrival day of month (1-31):</label>
+          <input type="number" id="arrival_day_of_month" name="arrival_day_of_month">
+   <br />
+   <br />
+         <label for="arrival_week_number">3. Please enter the arrival week number:</label>
+         <input type="number" id="arrival_week_number" name="arrival_week_number">
+   <br />
+
+   <br />
+         <label for="reservation_day">4. Please enter the day of reservation (1-31):</label>
+         <input type="number" id="reservation_day" name="reservation_day">
+   <br />
+
+   <br />
+         <label for="reservation_month">5. Please enter the month of reservation (1-12):</label>
+         <input type="number" id="reservation_month" name="reservation_month">
+   <br />
+   
+   <br />
+         <label for="reservation_weekday">6. Please enter the weekday of reservation (1-7):</label>
+         <input type="number" id="reservation_weekday" name="reservation_weekday">
+   <br />
+
+   <br />
+         <label for="lead_time">7. Please enter the lead time of reservation in days:</label>
+         <input type="number" id="lead_time" name="lead_time">
+   <br />
+
+   <br />
+         <label for="stays_in_week_nights">8. Please enter the number of staying nights on week days:</label>
+         <input type="number" id="stays_in_week_nights" name="stays_in_week_nights">
+   <br />
+
+   <br />
+         <label for="stays_in_weekend_nights">9. Please enter the number of staying nights on weekends:</label>
+         <input type="number" id="stays_in_weekend_nights" name="stays_in_weekend_nights">
+   <br />
+
+   <br />
+         <label for="total_of_special_requests">10. Please enter the number of special requests:</label>
+         <input type="number" id="total_of_special_requests" name="total_of_special_requests">
+   <br />
+
+   <br />
+         <label for="market_segment">11. Please enter the number of market segment (0-7):</label>
+         <input type="number" id="market_segment" name="market_segment">
+   <br />
+
+   <br />
+        <input type=submit value="Prediction based on booking information." class="button" >
+   </dl>
+   </form>
 
 </body>
 </html>

@@ -1,8 +1,19 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700,600);
 
+head{
+  margin: 25px;
+  background-color: #871F78;
+  font-family: arial, sans-serif;
+  font-size: 14px;
+}
 body {
   height: 100%;
   -webkit-font-smoothing: antialiased;
-  font-family: 'Open Sans', sans-serif;
-  background-color:#cdced8;
+  font-family: "Times New Roman", sans-serif;
+  background-color: #d6d6d6;
+  font-size: 16px;
+}
+
+.breaker{
+  color : #170b3f;
 }

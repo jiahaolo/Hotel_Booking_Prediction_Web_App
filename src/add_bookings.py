@@ -1,9 +1,7 @@
 """Creates, ingests data into, and enables querying of a table of
  bookings for the hotels to query from and display results to the user."""
 
-import argparse
 import logging.config
-import os
 import typing
 
 import flask
@@ -16,70 +14,36 @@ logger = logging.getLogger(__name__)
 
 Base: typing.Any = declarative_base()
 
+
 class Bookings(Base):
     """Creates a data model for the database to be set up for hotel bookings.
     """
 
-    __tablename__ = 'bookings'
+    __tablename__ = "bookings"
 
     id = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=True, autoincrement=True)
-    hotel = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                              nullable=False)
-    lead_time = sqlalchemy.Column(sqlalchemy.Integer, primary_key=False)
-    arrival_date_year = sqlalchemy.Column(
-        sqlalchemy.Integer, primary_key=False)
-    arrival_date_month = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                                           nullable=False)
-    arrival_week_number = sqlalchemy.Column(
+    hotel = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=False)
     arrival_date_day_of_month = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=False)
-    stays_in_weekend_nights = sqlalchemy.Column(
+    arrival_date_week_number = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=False)
+    reservation_day = sqlalchemy.Column(
+        sqlalchemy.Integer, primary_key=False)
+    reservation_month = sqlalchemy.Column(
+        sqlalchemy.Integer, primary_key=False)
+    reservation_weekday = sqlalchemy.Column(
+        sqlalchemy.Integer, primary_key=False)
+    lead_time = sqlalchemy.Column(sqlalchemy.Integer, primary_key=False)
     stays_in_week_nights = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=False)
-    adult = sqlalchemy.Column(sqlalchemy.Integer, primary_key=False)
-    children = sqlalchemy.Column(sqlalchemy.Integer, primary_key=False)
-    babies = sqlalchemy.Column(sqlalchemy.Integer, primary_key=False)
-    meal = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                             nullable=False)
-    country = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                                nullable=False)
-    market_segment = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                                       nullable=False)
-    distribution_channel = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                                             nullable=False)
-    is_repeated_guest = sqlalchemy.Column(
-        sqlalchemy.Integer, primary_key=False)
-    previous_cancellations = sqlalchemy.Column(
-        sqlalchemy.Integer, primary_key=False)
-    previous_bookings_not_canceled = sqlalchemy.Column(
-        sqlalchemy.Integer, primary_key=False)
-    reserved_room_type = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                                           nullable=False)
-    assigned_room_type = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                                           nullable=False)
-    booking_changes = sqlalchemy.Column(sqlalchemy.Integer, primary_key=False)
-    deposit_type = sqlalchemy.Column(
-        sqlalchemy.String(100), unique=False, nullable=False)
-    agent = sqlalchemy.Column(sqlalchemy.String(
-        100), unique=False, nullable=False)
-    company = sqlalchemy.Column(sqlalchemy.String(
-        100), unique=False, nullable=False)
-    days_in_waiting_list = sqlalchemy.Column(
-        sqlalchemy.Integer, primary_key=False)
-    customer_type = sqlalchemy.Column(
-        sqlalchemy.String(100), unique=False, nullable=False)
-    asr = sqlalchemy.Column(sqlalchemy.Float, primary_key=False)
-    required_car_parking_spaces = sqlalchemy.Column(
+    stays_in_weekend_nights = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=False)
     total_of_special_requests = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=False)
-    reservation_status = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                                           nullable=False)
-    reservation_status_date = sqlalchemy.Column(sqlalchemy.String(100), unique=False,
-                                                nullable=False)
+    market_segment = sqlalchemy.Column(
+        sqlalchemy.Integer, primary_key=False)
 
     def __repr__(self):
         return f'<Booking {self.title}>'
@@ -113,65 +77,62 @@ class BookingManager:
         """
         self.session.close()
 
-    def add_booking(self, hotel: int, lead_time: int,
-                    arrival_date_year: int, arrival_date_month: str, arrival_week_number: int,
-                    arrival_date_day_of_month: int, stays_in_weekend_nights: int, stays_in_week_nights: int,
-                    adult: int, children: int, babies: int, meal: str, country: str, market_segment: str,
-                    distribution_channel: str, is_repeated_guest: str, previous_cancellations: str,
-                    previous_bookings_not_canceled: str, reserved_room_type: str, assigned_room_type: str,
-                    booking_changes: int, deposit_type: str, agent: str, company: str,
-                    days_in_waiting_list: int, customer_type: str, asr: float,
-                    required_car_parking_spaces, total_of_special_requests,
-                    reservation_status, reservation_status_date) -> None:
-        """Seeds an existing database with additional bookings.
+    def add_booking(self, hotel: int,
+                    arrival_date_day_of_month: int,
+                    arrival_date_week_number: int,
+                    reservation_day: int,
+                    reservation_month: int,
+                    reservation_weekday: int,
+                    lead_time: int,
+                    stays_in_week_nights: int,
+                    stays_in_weekend_nights: int,
+                    total_of_special_requests: int,
+                    market_segment: int) -> None:
+        """
+        Adds a booking to the database.
+
         Args:
-            hotel (int): Hotel ID
-            lead_time (int): Lead time
-            arrival_date_year (int): Arrival date year
-            arrival_date_month (str): Arrival date month
-            arrival_week_number (int): Arrival week number
-            arrival_date_day_of_month (int): Arrival date day of month
-            stays_in_weekend_nights (int): Stays in weekend nights
-            stays_in_week_nights (int): Stays in week nights
-            adult (int): Adult
-            children (int): Children
-            babies (int): Babies
-            meal (str): Meal
-            country (str): Country
-            market_segment (str): Market segment
-            distribution_channel (str): Distribution channel
-            is_repeated_guest (str): Repeated guest
-            previous_cancellations (str): Previous cancellations
-            previous_bookings_not_canceled (str): Previous bookings not canceled
-            reserved_room_type (str): Reserved room type
-            assigned_room_type (str): Assigned room type
-            booking_changes (int): Booking changes
-            deposit_type (str): Deposit type
-            agent (str): Agent
-            company (str): Company
-            days_in_waiting_list (int): Days in waiting list
-            customer_type (str): Customer type
-            asr (float): ASR
-            required_car_parking_spaces (int): Required car parking spaces
-            total_of_special_requests (int): Total of special requests
-            reservation_status (str): Reservation status
-            reservation_status_date (str): Reservation status date
+
+            hotel (int): The hotel number of the booking.
+            arrival_date_day_of_month (int): The day of the month of the arrival
+                date.
+            arrival_date_week_number (int): The week number of the arrival date.
+            reservation_day (int): The day of the month of the reservation.
+            reservation_month (int): The month of the reservation.
+            reservation_weekday (int): The weekday of the reservation.
+            lead_time (int): The lead time of the booking.
+            stays_in_week_nights (int): The number of nights staying in the week.
+            stays_in_weekend_nights (int): The number of nights staying in the
+                weekend.
+            total_of_special_requests (int): The total number of special requests
+                for the booking.
+            market_segment (int): The market segment of the booking.
+
         Returns: None
         """
-        session = self.session
-        booking = Bookings(hotel=hotel, lead_time=lead_time,
-                           arrival_date_year=arrival_date_year, arrival_date_month=arrival_date_month, arrival_week_number=arrival_week_number,
-                           arrival_date_day_of_month=arrival_date_day_of_month, stays_in_weekend_nights=stays_in_weekend_nights, stays_in_week_nights=stays_in_week_nights,
-                           adult=adult, children=children, babies=babies, meal=meal, country=country, market_segment=market_segment,
-                           distribution_channel=distribution_channel, is_repeated_guest=is_repeated_guest, previous_cancellations=previous_cancellations,
-                           previous_bookings_not_canceled=previous_bookings_not_canceled, reserved_room_type=reserved_room_type, assigned_room_type=assigned_room_type,
-                           booking_changes=booking_changes, deposit_type=deposit_type, agent=agent, company=company,
-                           days_in_waiting_list=days_in_waiting_list, customer_type=customer_type, asr=asr,
-                           required_car_parking_spaces=required_car_parking_spaces, total_of_special_requests=total_of_special_requests,
-                           reservation_status=reservation_status, reservation_status_date=reservation_status_date)
-        session.add(booking)
-        session.commit()
-        logger.info("Booking added to database.")
+        try:
+            session = self.session
+            booking = Bookings(hotel=hotel,
+                               arrival_date_day_of_month=arrival_date_day_of_month,
+                               arrival_date_week_number=arrival_date_week_number,
+                               reservation_day=reservation_day,
+                               reservation_month=reservation_month,
+                               reservation_weekday=reservation_weekday,
+                               lead_time=lead_time,
+                               stays_in_week_nights=stays_in_week_nights,
+                               stays_in_weekend_nights=stays_in_weekend_nights,
+                               total_of_special_requests=total_of_special_requests,
+                               market_segment=market_segment)
+
+            session.add(booking)
+            session.commit()
+            logger.info("Booking added to database.")
+        except sqlalchemy.exc.IntegrityError as e:
+            logger.error("Error adding booking to database: %s", e)
+            session.rollback()
+        except sqlalchemy.exc.OperationalError as e:
+            logger.error("Error adding booking to database: %s", e)
+            session.rollback()
 
 
 def create_db(engine_string: str) -> None:

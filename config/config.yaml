@@ -1,0 +1,82 @@
+model:
+  name: hotel-booking-cancellation-model
+  author: Jia Hao Lo
+  version: 1.0
+  description: A model to classify whether a hotel booking will be cancelled. 
+  tags:
+  - classifier
+  - cloud
+  dependencies: requirements.txt
+clean:
+  fill_missing_values:
+    value: 0
+  drop_error_rows:
+    cond: ['adults', 'children', 'babies', 'adr']
+  get_datetime_features:
+    date_col: 'reservation_status_date'
+  label_encoding:
+    columns: ['hotel', 'meal', 'market_segment', 'distribution_channel',
+                   'reserved_room_type', 'deposit_type', 'customer_type', 'year']
+  log_transform:
+    cols: ['lead_time', 'arrival_date_week_number', 'arrival_date_day_of_month',
+                'agent', 'company', 'adr']
+  drop_columns:
+    columns: ['days_in_waiting_list',  'arrival_date_year', 'assigned_room_type',
+                   'booking_changes', 'reservation_status', 'country', 
+                   'reservation_status_date', 'arrival_date_month']
+  get_features: 
+    target_col: 'is_canceled'
+  get_target: 
+    target_col: 'is_canceled'
+train:
+  train_test_split_data:
+    target_col: 'is_canceled'
+    test_size: 0.3
+    random_state: 42
+  train_dt_model:
+    initial_features: ['hotel',
+                        'arrival_date_day_of_month',
+                        'arrival_date_week_number',
+                        'day',
+                        'month',
+                        'weekday',
+                        'lead_time',
+                        'stays_in_week_nights',
+                        'stays_in_weekend_nights',
+                        'total_of_special_requests',
+                        'market_segment']
+    random_state: 42
+  train:
+    target_column: 'is_canceled'
+    initial_features: ['hotel',
+                        'arrival_date_day_of_month',
+                        'arrival_date_week_number',
+                        'day',
+                        'month',
+                        'weekday',
+                        'lead_time',
+                        'stays_in_week_nights',
+                        'stays_in_weekend_nights',
+                        'total_of_special_requests',
+                        'market_segment']
+    test_size: 0.3
+    random_state: 42
+
+evaluate:
+  evaluate:
+    initial_features: ['hotel',
+                        'arrival_date_day_of_month',
+                        'arrival_date_week_number',
+                        'day',
+                        'month',
+                        'weekday',
+                        'lead_time',
+                        'stays_in_week_nights',
+                        'stays_in_weekend_nights',
+                        'total_of_special_requests',
+                        'market_segment']
+
+predict:
+  predict:
+    model_path: 'models/dt_model.pkl'
+
