@@ -68,51 +68,6 @@ def index():
             traceback.print_exc()
             logger.warning('Hotel booking information not found.')
             return render_template('error.html')
-    """
-    elif request.method == 'POST':
-        try:
-            hotel = request.form['hotel_type']
-            arrival_day_of_month = request.form['arrival_day_of_month']
-            arrival_week_number = request.form['arrival_week_number']
-            reservation_day = request.form['reservation_day']
-            reservation_month = request.form['reservation_month']
-            reservation_weekday = request.form['reservation_weekday']
-            lead_time = request.form['lead_time']
-            stays_in_week_nights = request.form['stays_in_week_nights']
-            stays_in_weekend_nights = request.form['stays_in_weekend_nights']
-            total_of_special_requests = request.form['total_of_special_requests']
-            market_segment = request.form['market_segment']
-
-            new_booking_df = pd.DataFrame()
-            if request.form['hotel'] == 'City Hotel':
-                new_booking_df['hotel'] = 1
-            else:
-                new_booking_df['hotel'] = 0
-            new_booking_df['arrival_date_day_of_month'] = request.form['arrival_date_day_of_month']
-            new_booking_df['arrival_date_week_number'] = request.form['arrival_date_week_number']
-            new_booking_df['reservation_day'] = request.form['reservation_day']
-            new_booking_df['reservation_month'] = request.form['reservation_month']
-            new_booking_df['reservation_weekday'] = request.form['reservation_weekday']
-            new_booking_df['lead_time'] = request.form['lead_time']
-            new_booking_df['stays_in_week_nights'] = request.form['stays_in_week_nights']
-            new_booking_df['stays_in_weekend_nights'] = request.form['stays_in_weekend_nights']
-            new_booking_df['total_of_special_requests'] = request.form['total_of_special_requests']
-            new_booking_df['market_segment'] = request.form['market_segment']
-
-            prediction, prediction_prob = predict(
-                new_booking_df, cfg['predict']['predict'])
-
-            url_for_post = url_for(
-                'response', prediction=prediction, prediction_prob=prediction_prob)
-
-            logger.info('Prediction for new booking from %s: %s',
-                        request.form['hotel'], prediction)
-            return redirect(url_for_post)
-        except Exception as e:
-            traceback.print_exc()
-            logger.warning('Hotel booking information not found.')
-            return render_template('error.html')
-    """
 
 @app.route('/predict.html/<prediction>/<prediction_prob>', methods=['GET', 'POST'])
 def response(prediction, prediction_prob):
@@ -126,7 +81,7 @@ def response(prediction, prediction_prob):
     '''
     if request.method == 'GET':
         try:
-            logger.debug('Index page accessed')
+            logger.debug('Prediction page accessed')
             return render_template('predict.html', prediction=prediction, prediction_prob=prediction_prob)
         except Exception as e:
             traceback.print_exc()
@@ -188,8 +143,11 @@ def add_entry():
             prediction, prediction_prob = predict(
                 booking_df, **cfg['predict']['predict'])
 
+            logger.debug(prediction)
+            logger.debug(prediction_prob)
+
             url_for_post = url_for(
-                'response', prediction=prediction, prediction_prob=prediction_prob[0][1])
+                'response', prediction=prediction, prediction_prob=round(prediction_prob[0][1],2))
 
             return redirect(url_for_post)
 

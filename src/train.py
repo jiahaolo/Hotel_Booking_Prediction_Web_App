@@ -8,6 +8,7 @@ import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
 
 
 logger = logging.getLogger(__name__)
@@ -78,7 +79,7 @@ def train_dt_model(x_train: pd.DataFrame, y_train: pd.Series,  # pylint: disable
     try:
         # Train the decision tree model
         logger.info("Training the decision tree model")
-        dt_model = DecisionTreeClassifier(random_state=random_state)
+        dt_model = LogisticRegression(random_state=random_state)
         logger.info("Fitting the decision tree model")
         dt_model.fit(x_train[initial_features], y_train.values.ravel())
 

@@ -6,17 +6,34 @@
     <style>
       h1 {
         text-align: center;
-        color: #424242;
+        color: #abeedc;
+        font-size: 60px;
+      }
+
+      h2 {
+        text-align: center;
+        color: #f8d2dd;
+        font-size: 30px;
       }
       p {
       text-align: center;
       font-weight: bold;
-      color: #424242;
+      color: #c1c5d0;
+      font-size: 30px;
       }
       div {text-align: center}
       body {
-        background-color: #F2F2F2
+        background-image: url('https://images.unsplash.com/photo-1615239043173-06c932ddcb18?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80');
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
       }
+      a {
+            text-align: center;
+            font-weight: bold;
+            color: #a297e5;
+            font-size: 20px;
+          }
     </style>
 
     <link href="static/basic.css" rel="stylesheet">
@@ -29,16 +46,20 @@
     
         <hr/>
     
-        <p>
-          Probability of Booking Cancellation: {{ prediction_prob }}%
-        </p>
+        <h2>
+          Probability of Booking Cancellation: {{ prediction_prob }}
+        </h2>
     
         <p>
-          Conclusion: {{ prediction }}
-        
+          Conclusion: {{ prediction }}.
+          
+          Booking saved to database.
+        </p>
+      
         <br/>
         <div>
           <a href="{{ url_for('index') }}" style = "text-align:center;">Return to the Main Menu to Get More Predictions</a>
         </div>
         <br/>
+      </body>
 </html>
