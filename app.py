@@ -8,7 +8,7 @@ from flask import Flask, render_template, request, redirect, url_for
 
 # For setting up the Flask-SQLAlchemy database session
 from config.flaskconfig import HOTEL_TYPE, MODEL_PATH
-from src.add_bookings import BookingManager
+from src.add_bookings import BookingManager, Bookings
 from src.predict import predict
 
 # Initialize the Flask application
@@ -69,28 +69,6 @@ def index():
             logger.warning('Hotel booking information not found.')
             return render_template('error.html')
 
-@app.route('/predict.html/<prediction>/<prediction_prob>', methods=['GET', 'POST'])
-def response(prediction, prediction_prob):
-    '''View that displays the prediction.
-
-    Create view into index page that user adds new bookings.
-
-    Returns:
-        Rendered html template
-
-    '''
-    if request.method == 'GET':
-        try:
-            logger.debug('Prediction page accessed')
-            return render_template('predict.html', prediction=prediction, prediction_prob=prediction_prob)
-        except Exception as e:
-            traceback.print_exc()
-            logger.warning('Hotel booking information not found.')
-            return render_template('error.html')
-    elif request.method == 'POST':
-        return "POST"
-
-
 @app.route('/predict', methods=['POST', 'GET'])
 def add_entry():
     '''View that process a POST with new booking input
@@ -105,19 +83,7 @@ def add_entry():
     if request.method == 'POST':
 
         try:
-            booking_manager.add_booking(hotel=request.form['hotel_type'],
-                                        arrival_date_day_of_month=request.form['arrival_day_of_month'],
-                                        arrival_date_week_number=request.form['arrival_week_number'],
-                                        reservation_day=request.form['reservation_day'],
-                                        reservation_month=request.form['reservation_month'],
-                                        reservation_weekday=request.form['reservation_weekday'],
-                                        lead_time=request.form['lead_time'],
-                                        stays_in_week_nights=request.form['stays_in_week_nights'],
-                                        stays_in_weekend_nights=request.form['stays_in_weekend_nights'],
-                                        total_of_special_requests=request.form['total_of_special_requests'],
-                                        market_segment=request.form['market_segment'])
-            logger.info('New booking from %s added', request.form['hotel_type'])
-
+            logger.debug(request.form['hotel_type'])
             booking_dict = {
                 'hotel': request.form['hotel_type'],
                 'arrival_date_day_of_month': request.form['arrival_day_of_month'],
@@ -134,7 +100,7 @@ def add_entry():
 
             logger.debug(booking_dict)
 
-            booking_df = pd.DataFrame(booking_dict, index=[0]) 
+            booking_df = pd.DataFrame(booking_dict, index=[0])
             if booking_df['hotel'][0] == 'City Hotel':
                 booking_df['hotel'] = 1
             else:
@@ -146,8 +112,22 @@ def add_entry():
             logger.debug(prediction)
             logger.debug(prediction_prob)
 
+            booking_manager.add_booking(hotel=booking_df['hotel'][0],
+                                        arrival_date_day_of_month=request.form['arrival_day_of_month'],
+                                        arrival_date_week_number=request.form['arrival_week_number'],
+                                        reservation_day=request.form['reservation_day'],
+                                        reservation_month=request.form['reservation_month'],
+                                        reservation_weekday=request.form['reservation_weekday'],
+                                        lead_time=request.form['lead_time'],
+                                        stays_in_week_nights=request.form['stays_in_week_nights'],
+                                        stays_in_weekend_nights=request.form['stays_in_weekend_nights'],
+                                        total_of_special_requests=request.form['total_of_special_requests'],
+                                        market_segment=request.form['market_segment'])
+            logger.info('New booking from %s added',
+                        request.form['hotel_type'])
+
             url_for_post = url_for(
-                'response', prediction=prediction, prediction_prob=round(prediction_prob[0][1],2))
+                'response', prediction=prediction, prediction_prob=round(prediction_prob[0][1], 2))
 
             return redirect(url_for_post)
 
@@ -156,6 +136,29 @@ def add_entry():
             logger.warning('Hotel booking information not found.')
             return render_template('error.html')
 
+@app.route('/predict.html/<prediction>/<prediction_prob>', methods=['GET', 'POST'])
+def response(prediction, prediction_prob):
+    '''View that displays the prediction.
+
+    Create view into index page that user adds new bookings.
+
+    Returns:
+        Rendered html template
+
+    '''
+    if request.method == 'GET':
+        try:
+            logger.debug('Prediction page accessed')
+            res = booking_manager.session.query(Bookings)
+            logger.debug(res)
+            logger.debug(res.all())
+            return render_template('predict.html', prediction=prediction, prediction_prob=prediction_prob, responses=res)
+        except Exception as e:
+            traceback.print_exc()
+            logger.warning('Hotel booking information not found.')
+            return render_template('error.html')
+    elif request.method == 'POST':
+        return "POST"
 
 if __name__ == '__main__':
     app.run(debug=app.config['DEBUG'], port=app.config['PORT'],

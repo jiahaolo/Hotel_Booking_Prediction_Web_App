@@ -46,7 +46,7 @@ class Bookings(Base):
         sqlalchemy.Integer, primary_key=False)
 
     def __repr__(self):
-        return f'<Booking {self.title}>'
+        return f'<Booking {self.id}>'
 
 
 class BookingManager:
