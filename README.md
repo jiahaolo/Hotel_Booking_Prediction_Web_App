@@ -35,12 +35,10 @@ https://www.kaggle.com/datasets/jessemostipak/hotel-booking-demand?resource=down
 
 1. Machine Learning Performance Metric:
 
-   F1-score will be used as the model evaluation metric. The final model with cross-validation F1-score more than 0.9 will be  selected for deployment.
+   F1-score will be used as the model evaluation metric. The final model with F1-score more than 0.9 on testing data will be selected for deployment.
 
 2. Business Outcome Metric:
 
     * Cost reduction from optimizing wasted resources on cancelled booking
 
     * Revenue increment from preventing cancellation by addressing the key drivers accordingly.
-
-

@@ -2,10 +2,10 @@ model:
   name: hotel-booking-cancellation-model
   author: Jia Hao Lo
   version: 1.0
-  description: A model to classify whether a hotel booking will be cancelled. 
+  description: A model to classify whether a hotel booking will be cancelled.
   tags:
   - classifier
-  - cloud
+  - bookings
   dependencies: requirements.txt
 clean:
   fill_missing_values:
@@ -22,11 +22,11 @@ clean:
                 'agent', 'company', 'adr']
   drop_columns:
     columns: ['days_in_waiting_list',  'arrival_date_year', 'assigned_room_type',
-                   'booking_changes', 'reservation_status', 'country', 
+                   'booking_changes', 'reservation_status', 'country',
                    'reservation_status_date', 'arrival_date_month']
-  get_features: 
+  get_features:
     target_col: 'is_canceled'
-  get_target: 
+  get_target:
     target_col: 'is_canceled'
 train:
   train_test_split_data:
@@ -63,7 +63,7 @@ train:
     random_state: 42
 
 evaluate:
-  evaluate:
+  score_model:
     initial_features: ['hotel',
                         'arrival_date_day_of_month',
                         'arrival_date_week_number',
@@ -79,4 +79,3 @@ evaluate:
 predict:
   predict:
     model_path: 'models/dt_model.pkl'
-

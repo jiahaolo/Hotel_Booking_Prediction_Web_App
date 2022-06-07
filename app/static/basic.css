@@ -1,12 +1,11 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700,600);
 
 head{
   margin: 25px;
   background-color: #871F78;
   font-family: arial, sans-serif;
   font-size: 14px;
-  
-  
+
+
 }
 body {
   height: 100%;
@@ -18,6 +17,7 @@ body {
   background-size: cover;
   font-size: 30px;
   color: #c1c5d0;
+  padding: 25px;
 }
 
 h3{
@@ -26,6 +26,7 @@ h3{
   font-size: 60px;
   color: #abeedc;
   opacity: 1.0;
+  padding: 25px;
 }
 
 h4{
@@ -34,11 +35,12 @@ h4{
   font-size: 40px;
   color: #f8d2dd;
   opacity: 1.0;
+  padding: 25px;
 }
 
 br{
   font-family:  monaco; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px;
-  font-size: 30px;
+  font-size: 20px;
   color: #c1c5d0;
   opacity: 1.0;
 }
@@ -50,4 +52,3 @@ a {
   font-size: 30px;
   opacity: 1.0;
 }
-

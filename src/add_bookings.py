@@ -136,14 +136,15 @@ class BookingManager:
 
 
 def create_db(engine_string: str) -> None:
-    """Create database with Tracks() data model from provided engine string.
+    """Create database with Bookings() data model from provided engine string.
     Args:
         engine_string (str): SQLAlchemy engine string specifying which database
             to write to
     Returns: None
     """
-    print(engine_string)
-    engine = sqlalchemy.create_engine(engine_string)
-
-    Base.metadata.create_all(engine)
-    logger.info("Database created.")
+    try:
+        engine = sqlalchemy.create_engine(engine_string)
+        Base.metadata.create_all(engine)
+        logger.info("Database created.")
+    except sqlalchemy.exc.OperationalError as e:
+        logger.error("Error creating database: %s", e)

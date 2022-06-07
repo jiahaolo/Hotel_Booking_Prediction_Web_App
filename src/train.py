@@ -8,13 +8,12 @@ import pickle
 import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
-from sklearn.linear_model import LogisticRegression
 
 
 logger = logging.getLogger(__name__)
 
 
-def train_test_split_data(data:pd.DataFrame, target_col:'str', test_size: float = 0.4,
+def train_test_split_data(data:pd.DataFrame, target_col:str, test_size: float = 0.4,
                           random_state: int = 42) -> typing.Union[pd.DataFrame, pd.Series]:
     """
     Split the data into a training and testing set.
@@ -25,6 +24,14 @@ def train_test_split_data(data:pd.DataFrame, target_col:'str', test_size: float 
     Returns:
         pd.DataFrame: The training and testing data.
     """
+
+    if not isinstance(data, pd.DataFrame):
+        logger.error("Invalid data")
+        raise TypeError("data must be a pandas DataFrame")
+    if not isinstance(target_col, str):
+        logger.error("Invalid target column")
+        raise TypeError("target_col must be a string")
+
     # Return whole data if test_size is 0
     if test_size == 0:
         logger.info("Test size is 0, returning whole data")
@@ -44,6 +51,9 @@ def train_test_split_data(data:pd.DataFrame, target_col:'str', test_size: float 
 
     # Catch exceptions for train_test_split
     except ValueError as err:
+        logger.error("Error: %s", err)
+        raise err
+    except KeyError as err:
         logger.error("Error: %s", err)
         raise err
     except Exception as err:
@@ -79,7 +89,7 @@ def train_dt_model(x_train: pd.DataFrame, y_train: pd.Series,  # pylint: disable
     try:
         # Train the decision tree model
         logger.info("Training the decision tree model")
-        dt_model = LogisticRegression(random_state=random_state)
+        dt_model = DecisionTreeClassifier(random_state=random_state)
         logger.info("Fitting the decision tree model")
         dt_model.fit(x_train[initial_features], y_train.values.ravel())
 
@@ -98,32 +108,44 @@ def train_dt_model(x_train: pd.DataFrame, y_train: pd.Series,  # pylint: disable
     return dt_model
 
 
-def train(input_path, output_path, target_column,initial_features, test_size, random_state):
+def train(input_path,x_train_path, y_train_path, x_test_path, y_test_path,
+            model_path, target_column,initial_features, test_size, random_state):
     """
     Train the decision tree model.
+
     Args:
         input_path (str): The path to the input data.
-        output_path (str): The path to the output data.
-        target_column (str): The name of the column to predict.
+        x_train_path (str): The path to the training features.
+        y_train_path (str): The path to the training labels.
+        x_test_path (str): The path to the testing features.
+        y_test_path (str): The path to the testing labels.
+        model_path (str): The path to the model.
+        target_column (str): The target column.
+        initial_features (list): The initial features used to train the model.
         test_size (float): The proportion of the data to use for testing.
         random_state (int): The seed for the random number generator.
     """
+
     # Load the data
-    logger.info("Loading data")
-    data = pd.read_csv(input_path, index_col=0)
+    logger.info("Loading the data")
+    data = pd.read_csv(input_path)
 
     # Split the data into a training and testing set
     logger.info("Splitting data into training and testing set")
-    x_train, _, y_train,_ = train_test_split_data(  # pylint: disable=unbalanced-tuple-unpacking
-        data, target_column, test_size, random_state)
+    x_train, x_test, y_train, y_test = train_test_split_data(data, target_column, test_size, random_state)
 
     # Train the decision tree model
     logger.info("Training the decision tree model")
-    dt_model = train_dt_model(x_train, y_train, initial_features=initial_features,
-                              random_state=random_state)
+    dt_model = train_dt_model(x_train, y_train, initial_features, random_state)
 
-    # Save the trained model
-    logger.info("Saving the decision tree model")
+    # Save the model
+    logger.info("Saving the model")
+    with open(model_path, 'wb') as file:
+        pickle.dump(dt_model, file)
 
-    with open(output_path, "wb") as file_handle:
-        pickle.dump(dt_model, file_handle)
+    # Save the training and testing data
+    logger.info("Saving the training and testing data")
+    x_train.to_csv(x_train_path, index=False)
+    y_train.to_csv(y_train_path, index=False)
+    x_test.to_csv(x_test_path, index=False)
+    y_test.to_csv(y_test_path, index=False)
