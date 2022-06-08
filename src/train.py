@@ -17,12 +17,15 @@ def train_test_split_data(data:pd.DataFrame, target_col:str, test_size: float = 
                           random_state: int = 42) -> typing.Union[pd.DataFrame, pd.Series]:
     """
     Split the data into a training and testing set.
+
     Args:
-        data (pd.DataFrame): The data to split.
+        data (pd.DataFrame): The data to be split.
+        target_col (str): The target column.
         test_size (float): The proportion of the data to use for testing.
         random_state (int): The seed for the random number generator.
+
     Returns:
-        pd.DataFrame: The training and testing data.
+        A tuple containing the training and testing data.
     """
 
     if not isinstance(data, pd.DataFrame):
@@ -69,12 +72,15 @@ def train_dt_model(x_train: pd.DataFrame, y_train: pd.Series,  # pylint: disable
                    random_state: int = 42) -> DecisionTreeClassifier:
     """
     Train the decision tree model.
+
     Args:
         x_train (pd.DataFrame): The training features.
         y_train (pd.Series): The training labels.
-        initial_features (list): The initial features used to train the model.
+        initial_features (list): The initial features.
+        random_state (int): The seed for the random number generator.
+
     Returns:
-        object: The trained model.
+        dt_model (DecisionTreeClassifier): The decision tree model.
     """
 
     # Checking xtrain and ytrain
@@ -100,52 +106,91 @@ def train_dt_model(x_train: pd.DataFrame, y_train: pd.Series,  # pylint: disable
     except KeyError as err:
         logger.error("Error: %s", err)
         raise err
-    except Exception as err:
-        logger.error("Error: %s", err)
-        raise err
 
     # Return the trained model
     return dt_model
 
 
-def train(input_path,x_train_path, y_train_path, x_test_path, y_test_path,
-            model_path, target_column,initial_features, test_size, random_state):
+def train(input_path: str,x_train_path: str, y_train_path: str, x_test_path: str, y_test_path: str,
+            model_path: str, target_column: str,initial_features: typing.List[str], test_size: float,
+            random_state: int):
     """
     Train the decision tree model.
 
     Args:
         input_path (str): The path to the input data.
-        x_train_path (str): The path to the training features.
-        y_train_path (str): The path to the training labels.
-        x_test_path (str): The path to the testing features.
-        y_test_path (str): The path to the testing labels.
-        model_path (str): The path to the model.
+        x_train_path (str): The path to save the training features.
+        y_train_path (str): The path to save the training labels.
+        x_test_path (str): The path to save the testing features.
+        y_test_path (str): The path to  savethe testing labels.
+        model_path (str): The path to save the model.
         target_column (str): The target column.
         initial_features (list): The initial features used to train the model.
         test_size (float): The proportion of the data to use for testing.
         random_state (int): The seed for the random number generator.
+
+    Returns:
+        None
     """
 
     # Load the data
     logger.info("Loading the data")
-    data = pd.read_csv(input_path)
+    try:
+        data = pd.read_csv(input_path)
+    except FileNotFoundError as err:
+        logger.error("Error: %s", err)
+        raise err
 
     # Split the data into a training and testing set
     logger.info("Splitting data into training and testing set")
-    x_train, x_test, y_train, y_test = train_test_split_data(data, target_column, test_size, random_state)
+    try:
+        x_train, x_test, y_train, y_test = train_test_split_data(data, target_column, test_size, random_state)
+    except ValueError as err:
+        logger.error("Error: %s", err)
+        raise err
+    except KeyError as err:
+        logger.error("Error: %s", err)
+        raise err
 
     # Train the decision tree model
-    logger.info("Training the decision tree model")
-    dt_model = train_dt_model(x_train, y_train, initial_features, random_state)
+    try:
+        logger.info("Training the decision tree model")
+        dt_model = train_dt_model(x_train, y_train, initial_features, random_state)
+    except ValueError as err:
+        logger.error("Error: %s", err)
+        raise err
+    except KeyError as err:
+        logger.error("Error: %s", err)
+        raise err
 
-    # Save the model
-    logger.info("Saving the model")
-    with open(model_path, 'wb') as file:
-        pickle.dump(dt_model, file)
+    try:
+        # Save the model
+        logger.info("Saving the model")
+        with open(model_path, "wb") as file:
+            pickle.dump(dt_model, file)
+    except FileNotFoundError as err:
+        logger.error("Error: %s", err)
+        raise err
 
     # Save the training and testing data
     logger.info("Saving the training and testing data")
-    x_train.to_csv(x_train_path, index=False)
-    y_train.to_csv(y_train_path, index=False)
-    x_test.to_csv(x_test_path, index=False)
-    y_test.to_csv(y_test_path, index=False)
+    try:
+        x_train.to_csv(x_train_path, index=False)
+    except PermissionError as err:
+        logger.error("Error: %s", err)
+        raise err
+    try:
+        y_train.to_csv(y_train_path, index=False)
+    except PermissionError as err:
+        logger.error("Error: %s", err)
+        raise err
+    try:
+        x_test.to_csv(x_test_path, index=False)
+    except PermissionError as err:
+        logger.error("Error: %s", err)
+        raise err
+    try:
+        y_test.to_csv(y_test_path, index=False)
+    except PermissionError as err:
+        logger.error("Error: %s", err)
+        raise err

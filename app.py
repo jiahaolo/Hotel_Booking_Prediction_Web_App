@@ -7,7 +7,7 @@ import pandas as pd
 from flask import Flask, render_template, request, redirect, url_for
 
 # For setting up the Flask-SQLAlchemy database session
-from config.flaskconfig import HOTEL_TYPE, MODEL_PATH
+from config.flaskconfig import HOTEL_TYPE, YAML_PATH
 from src.add_bookings import BookingManager, Bookings
 from src.predict import predict
 
@@ -36,7 +36,7 @@ booking_manager = BookingManager(app)
 # Reading yaml file
 logger.info('Reading configuration file')
 try:
-    with open('./config/config.yaml', 'r') as ymlfile:
+    with open(YAML_PATH, 'r') as ymlfile:
         cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
 except FileNotFoundError:
     logger.error('Configuration file not found')
@@ -64,10 +64,11 @@ def index():
         try:
             logger.debug('Index page accessed')
             return render_template('index.html', hotel_type=HOTEL_TYPE)
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
             logger.warning('Hotel booking information not found.')
             return render_template('error.html')
+
 
 @app.route('/predict', methods=['POST', 'GET'])
 def add_entry():
@@ -131,7 +132,7 @@ def add_entry():
 
             return redirect(url_for_post)
 
-        except Exception as e:
+        except Exception:
             traceback.print_exc()
             logger.warning('Hotel booking information not found.')
             return render_template('error.html')
@@ -152,13 +153,14 @@ def response(prediction, prediction_prob):
             res = booking_manager.session.query(Bookings)
             logger.debug(res)
             logger.debug(res.all())
-            return render_template('predict.html', prediction=prediction, prediction_prob=prediction_prob, responses=res)
-        except Exception as e:
+            return render_template('predict.html', prediction=prediction,
+                                        prediction_prob=prediction_prob, responses=res)
+        except Exception:
             traceback.print_exc()
             logger.warning('Hotel booking information not found.')
             return render_template('error.html')
     elif request.method == 'POST':
-        return "POST"
+        return 'POST'
 
 if __name__ == '__main__':
     app.run(debug=app.config['DEBUG'], port=app.config['PORT'],

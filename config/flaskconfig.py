@@ -16,7 +16,7 @@ database = os.environ.get('DATABASE_NAME')
 port = os.environ.get('MYSQL_PORT')
 DIALECT ='mysql+pymysql'
 HOTEL_TYPE = ['Resort Hotel', 'City Hotel']
-MODEL_PATH = 'models/dt_model.pkl'
+YAML_PATH = 'config/config.yaml'
 
 
 SQLALCHEMY_DATABASE_URI = os.environ.get('SQLALCHEMY_DATABASE_URI')

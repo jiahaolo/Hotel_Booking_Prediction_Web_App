@@ -24,10 +24,7 @@ clean:
     columns: ['days_in_waiting_list',  'arrival_date_year', 'assigned_room_type',
                    'booking_changes', 'reservation_status', 'country',
                    'reservation_status_date', 'arrival_date_month']
-  get_features:
-    target_col: 'is_canceled'
-  get_target:
-    target_col: 'is_canceled'
+
 train:
   train_test_split_data:
     target_col: 'is_canceled'

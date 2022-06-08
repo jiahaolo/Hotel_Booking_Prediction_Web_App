@@ -23,9 +23,12 @@ def parse_s3(s3_path: str) -> typing.Tuple[str, str]:
     Returns:
         A tuple containing the bucket name and the path to the file in S3.
     """
+
+    # Define regex pattern to match S3 path
     regex = r's3://([\w._-]+)/([\w./_-]+)'
 
     try:
+        # Match the S3 path
         matched = re.match(regex, s3_path)
         s3bucket = matched.group(1)
         s3_path = matched.group(2)
@@ -33,9 +36,6 @@ def parse_s3(s3_path: str) -> typing.Tuple[str, str]:
         logger.error('Invalid S3 path: %s', s3_path)
         raise AttributeError from e
     return s3bucket, s3_path
-
-# uploading data to S3
-
 
 def upload_to_s3(local_path: str, s3_path: str) -> None:
     """
@@ -48,12 +48,15 @@ def upload_to_s3(local_path: str, s3_path: str) -> None:
     Returns:
         None.
     """
+    # Getting the bucket name and the path to the file in S3
     s3bucket, s3_just_path = parse_s3(s3_path)
+    logger.debug('s3bucket: %s', s3bucket)
+    logger.debug('s3_just_path: %s', s3_just_path)
 
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(s3bucket)
-
+    # Uploading the file to S3
     try:
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(s3bucket)
         bucket.upload_file(local_path, s3_just_path)
     except botocore.exceptions.NoCredentialsError:
         logger.error(
@@ -73,13 +76,15 @@ def download_from_s3(local_path: str, s3_path: str) -> None:
     Returns:
         None.
     """
-
+    # Getting the bucket name and the path to the file in S3
     s3bucket, s3_just_path = parse_s3(s3_path)
+    logger.debug('s3bucket: %s', s3bucket)
+    logger.debug('s3_just_path: %s', s3_just_path)
 
-    s3 = boto3.resource('s3')
-    bucket = s3.Bucket(s3bucket)
-
+    # Downloading the file from S3
     try:
+        s3 = boto3.resource('s3')
+        bucket = s3.Bucket(s3bucket)
         bucket.download_file(s3_just_path, local_path)
     except botocore.exceptions.NoCredentialsError:
         logger.error(

@@ -23,8 +23,9 @@ def delete_duplicates(df: pd.DataFrame) -> pd.DataFrame:
         A dataframe with duplicates removed.
     """
     logger.info('Deleting duplicates')
+    # Check if df is a dataframe
     if not isinstance(df, pd.DataFrame):
-        logger.error('Dataframe is not a dataframe')
+        logger.error('Input is not a dataframe')
         raise TypeError
     return df.drop_duplicates()
 
@@ -40,8 +41,9 @@ def fill_missing_values(df: pd.DataFrame, value: float = 0) -> pd.DataFrame:
         A dataframe with missing values filled.
     """
     logger.info('Filling missing values with %f', value)
+    # Check if df is a dataframe
     if not isinstance(df, pd.DataFrame):
-        logger.error('Dataframe is not a dataframe')
+        logger.error('Input is not a dataframe')
         raise TypeError
     return df.fillna(value)
 
@@ -56,13 +58,16 @@ def drop_error_rows(df: pd.DataFrame, cond: typing.List[str] = None) -> pd.DataF
     Returns:
         A dataframe with rows with errors dropped.
     """
+    # Use default condition if none is provided
     if cond is None:
         logger.info('Dropping default error rows')
         cond = ['adults', 'children', 'babies', 'adr']
+    # Check if df is a dataframe
     if not isinstance(df, pd.DataFrame):
-        logger.error('Dataframe is not a dataframe')
+        logger.error('Input is not a dataframe')
         raise TypeError
     try:
+        # Dropping bookings with 0 adults, children, babies, or adr less than or equal to 0
         df = df[~((df[cond[0]] == 0) & (df[cond[1]] == 0) & (df[cond[2]] == 0))]
         df = df[df[cond[3]] > 0]
         logger.info('Rows with errors dropped')
@@ -84,10 +89,12 @@ def get_datetime_features(df: pd.DataFrame, date_col: str = 'reservation_status_
         A dataframe with datetime features extracted.
     """
     logger.info('Converting %s to datetime features', date_col)
+    # Check if df is a dataframe
     if not isinstance(df, pd.DataFrame):
-        logger.error('Dataframe is not a dataframe')
+        logger.error('Input is not a dataframe')
         raise TypeError
     try:
+        # Extracting year, month, day, day of week
         df[date_col] = pd.to_datetime(df[date_col])
         df['year'] = df[date_col].dt.year
         df['month'] = df[date_col].dt.month
@@ -117,9 +124,12 @@ def label_encoding(df: pd.DataFrame, columns: typing.List[str] = None) -> pd.Dat
     Returns:
         A dataframe with columns encoded.
     """
+    # Check if df is a dataframe
     if not isinstance(df, pd.DataFrame):
-        logger.error('Dataframe is not a dataframe')
+        logger.error('Input is not a dataframe')
         raise TypeError
+
+    # Use default columns if none are provided
     if columns is None:
         logger.info('Encoding default columns')
         columns = ['hotel', 'meal', 'market_segment', 'distribution_channel',
@@ -145,14 +155,16 @@ def log_transform(df: pd.DataFrame, cols: typing.List = None) -> pd.DataFrame:
 
     Args:
         df (pd.DataFrame): The input dataframe.
-        col (str): The column to be transformed.
+        col (list): The column to be transformed.
 
     Returns:
         A dataframe with the column transformed.
     """
+    # Check if df is a dataframe
     if not isinstance(df, pd.DataFrame):
-        logger.error('Dataframe is not a dataframe')
+        logger.error('Input is not a dataframe')
         raise TypeError
+    # Use default columns if none are provided
     if cols is None:
         logger.info('Log transforming default columns')
         cols = ['lead_time', 'arrival_date_week_number', 'arrival_date_day_of_month',
@@ -181,9 +193,11 @@ def drop_columns(df: pd.DataFrame, columns: typing.List = None) -> pd.DataFrame:
     Returns:
         A dataframe with columns dropped.
     """
+    # Check if df is a dataframe
     if not isinstance(df, pd.DataFrame):
-        logger.error('Dataframe is not a dataframe')
+        logger.error('Input is not a dataframe')
         raise TypeError
+    # Use default columns if none are provided
     if columns is None:
         logger.info('Dropping default columns')
         columns = ['days_in_waiting_list', 'arrival_date_year', 'arrival_date_year', 'assigned_room_type',
@@ -194,7 +208,7 @@ def drop_columns(df: pd.DataFrame, columns: typing.List = None) -> pd.DataFrame:
 
 def get_clean_data(input_path: str, output_path: str) -> pd.DataFrame:
     """
-    Imports and cleans the data.
+    Wrapper function to clean the data.
 
     Args:
         input_path (str): The path to the input data.
@@ -220,5 +234,16 @@ def get_clean_data(input_path: str, output_path: str) -> pd.DataFrame:
     logger.info('Dropping columns')
     df = drop_columns(df)
     logger.info('Saving data')
-    df.to_csv(output_path)
+    try:
+        df.to_csv(output_path)
+        logger.info('Data saved')
+    except PermissionError as e:
+        logger.error('Permission denied')
+        raise PermissionError from e
+    except FileNotFoundError as e:
+        logger.error('File not found')
+        raise FileNotFoundError from e
+    except OSError as e:
+        logger.error('OS error')
+        raise OSError from e
     return df

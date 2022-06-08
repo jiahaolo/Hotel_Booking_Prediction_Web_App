@@ -7,7 +7,7 @@ db:
 raw: data/hotel_bookings.csv
 
 data/clean_bookings.csv: data/hotel_bookings.csv config/config.yaml
-	python3 run.py model_pipeline --step clean --input 'data/sample/hotel_bookings.csv' --config=config/test.yaml --output 'data/clean_bookings.csv'
+	python3 run.py model_pipeline --step clean --input 'data/sample/hotel_bookings.csv' --config=config/config.yaml --output 'data/clean_bookings.csv'
 
 cleaned: data/clean_bookings.csv
 

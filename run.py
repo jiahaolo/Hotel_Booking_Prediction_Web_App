@@ -1,11 +1,13 @@
 """Configures the subparsers for receiving command line arguments for each
  stage in the model pipeline and orchestrates their execution."""
 import argparse
+import sqlite3
 import logging.config
 import sys
 import yaml
 import pandas as pd
-
+import sqlalchemy
+import botocore
 
 from config.flaskconfig import SQLALCHEMY_DATABASE_URI
 from src.add_bookings import create_db, BookingManager
@@ -15,25 +17,9 @@ from src.train import train
 from src.evaluate import score_model, evaluate_model
 
 logging.config.fileConfig("config/logging/local.conf")
-logger = logging.getLogger()
+logger = logging.getLogger("BookingPredictor")
 
 if __name__ == "__main__":
-
-    # Reading yaml file
-    logger.info("Reading configuration file")
-    try:
-        with open("./config/config.yaml", "r") as ymlfile:
-            cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
-    except FileNotFoundError:
-        logger.error("Configuration file not found")
-        sys.exit(1)
-    except TypeError:
-        logger.error("Please check the type of the object")
-        sys.exit(1)
-    except AttributeError:
-        logger.error("Please check the attribute of the object")
-        sys.exit(1)
-    logger.info("Configuration file read")
 
     # Add parsers for both creating a database and adding bookings to it
     parser = argparse.ArgumentParser(
@@ -99,36 +85,135 @@ if __name__ == "__main__":
     sp_used = args.subparser_name
 
     if sp_used == "create_db":
-        logger.info("Creating database at %s", args.engine_string)
-        create_db(args.engine_string)
+        try:
+            logger.info("Creating database at %s", args.engine_string)
+            create_db(args.engine_string)
+        except sqlalchemy.exc.OperationalError as e:
+            logger.exception("Failed to create database")
+            sys.exit(1)
+        except sqlite3.OperationalError as e:
+            logger.exception("Failed to create database")
+            sys.exit(1)
     elif sp_used == "ingest":
-        bm = BookingManager(args.engine_string)
-        bm.add_booking(args.hotel, args.arrival_date_day_of_month,
-                       args.arrival_date_week_number, args.reservation_day,
-                       args.reservation_month, args.reservation_weekday,
-                       args.lead_time, args.stays_in_week_nights,
-                       args.stays_in_weekend_nights, args.total_of_special_requests,
-                       args.market_segment)
-        bm.close()
+        try:
+            bm = BookingManager(args.engine_string)
+            bm.add_booking(args.hotel, args.arrival_date_day_of_month,
+                        args.arrival_date_week_number, args.reservation_day,
+                        args.reservation_month, args.reservation_weekday,
+                        args.lead_time, args.stays_in_week_nights,
+                        args.stays_in_weekend_nights, args.total_of_special_requests,
+                        args.market_segment)
+            bm.close()
+        except sqlalchemy.exc.OperationalError as e:
+            logger.exception("Failed to ingest data")
+            sys.exit(1)
+        except sqlite3.OperationalError as e:
+            logger.exception("Failed to ingest data")
+            sys.exit(1)
+
     elif sp_used == "upload_to_s3":
-        upload_to_s3(args.local_path, args.s3_path)
+        try:
+            upload_to_s3(args.local_path, args.s3_path)
+        except botocore.exceptions.NoCredentialsError as e:
+            logger.exception("Failed to upload data to s3")
+            sys.exit(1)
     elif sp_used == "download_from_s3":
-        download_from_s3(args.local_path, args.s3_path)
+        try:
+            download_from_s3(args.local_path, args.s3_path)
+        except botocore.exceptions.NoCredentialsError as e:
+            logger.exception("Failed to download data from s3")
+            sys.exit(1)
     elif sp_used == "model_pipeline":
+        # Reading yaml file
+        logger.info("Reading configuration file")
+        try:
+            with open(args.config, "r") as ymlfile:
+                cfg = yaml.load(ymlfile, Loader=yaml.FullLoader)
+        except FileNotFoundError:
+            logger.error("Configuration file not found")
+            sys.exit(1)
+        except TypeError:
+            logger.error("Please check the type of the object")
+            sys.exit(1)
+        except AttributeError:
+            logger.error("Please check the attribute of the object")
+            sys.exit(1)
+        logger.info("Configuration file read")
+
         if args.step == "clean":
-            get_clean_data(args.input[0], args.output[0])
+            logger.info("Cleaning data")
+            try:
+                get_clean_data(args.input[0], args.output[0])
+            except PermissionError as e:
+                logger.exception("Failed to clean data")
+                sys.exit(1)
+            except FileNotFoundError as e:
+                logger.exception("Failed to clean data")
+                sys.exit(1)
+            except OSError as e:
+                logger.exception("Failed to clean data")
+                sys.exit(1)
         elif args.step == "train":
-            train(args.input[0], args.output[0],args.output[1],args.output[2],
+            logger.info("Training model")
+            try:
+                train(args.input[0], args.output[0],args.output[1],args.output[2],
                     args.output[3],args.output[4], **cfg["train"]["train"])
+            except FileNotFoundError as err:
+                logger.exception("Failed to train model")
+                sys.exit(1)
+            except ValueError as err:
+                logger.exception("Failed to train model")
+                sys.exit(1)
+            except KeyError as err:
+                logger.exception("Failed to train model")
+                sys.exit(1)
+            except PermissionError as err:
+                logger.exception("Failed to train model")
+                sys.exit(1)
         elif args.step == "score":
-            y_pred_proba, y_pred = score_model(args.input[0],args.input[1],**cfg["evaluate"]["score_model"])
-            y_pred_proba.to_csv(args.output[0], index=False)
-            y_pred.to_csv(args.output[1], index=False)
-            logger.info("Predictions saved.")
+            logger.info("Scoring model")
+            try:
+                y_pred_proba, y_pred = score_model(args.input[0],args.input[1],**cfg["evaluate"]["score_model"])
+                y_pred_proba.to_csv(args.output[0], index=False)
+                y_pred.to_csv(args.output[1], index=False)
+                logger.info("Predictions saved.")
+            except FileNotFoundError as err:
+                logger.exception("Failed to score model")
+                sys.exit(1)
+            except ValueError as err:
+                logger.exception("Failed to score model")
+                sys.exit(1)
+            except TypeError as err:
+                logger.exception("Failed to score model")
+                sys.exit(1)
+            except KeyError as err:
+                logger.exception("Failed to score model")
+                sys.exit(1)
+            except PermissionError as err:
+                logger.exception("Failed to score model")
+                sys.exit(1)
         elif args.step == "evaluate":
-            auc, accuracy, f1_scr = evaluate_model(args.input[0], args.input[1],
-                     args.input[2])
-            df_metrics = pd.DataFrame({"auc": [auc], "accuracy": [accuracy],"f1_score": [f1_scr]})
-            df_metrics.to_csv(args.output[0])
+            try:
+                auc, accuracy, f1_scr = evaluate_model(args.input[0], args.input[1],
+                        args.input[2])
+                df_metrics = pd.DataFrame({"auc": [auc], "accuracy": [accuracy],"f1_score": [f1_scr]})
+                df_metrics.to_csv(args.output[0])
+                logger.info("Metrics saved.")
+            except FileNotFoundError as err:
+                logger.exception("Failed to evaluate model")
+                sys.exit(1)
+            except ValueError as err:
+                logger.exception("Failed to evaluate model")
+                sys.exit(1)
+            except TypeError as err:
+                logger.exception("Failed to evaluate model")
+                sys.exit(1)
+            except KeyError as err:
+                logger.exception("Failed to evaluate model")
+                sys.exit(1)
+            except PermissionError as err:
+                logger.exception("Failed to evaluate model")
+                sys.exit(1)
+
     else:
         parser.print_help()

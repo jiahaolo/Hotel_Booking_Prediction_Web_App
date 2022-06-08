@@ -2,15 +2,24 @@
 This module contains functions used to make prediction based on the new user input.
 """
 import logging
+import typing
 import pickle
 import pandas as pd
 import numpy as np
 
 logger = logging.getLogger(__name__)
 
-def predict(df, model_path):
+def predict(df:pd.DataFrame, model_path:str) -> typing.Tuple[str,float]:
     """
     Make prediction based on the new user input.
+
+    Args:
+        df (pd.DataFrame): The dataframe of the new user input.
+        model_path (str): The path of the trained model.
+
+    Returns:
+        prediction(str): The prediction of the new user input.
+        prediction_proba(float): The probability of the prediction.
     """
     if not isinstance(df, pd.DataFrame):
         logger.error("Invalid input data")

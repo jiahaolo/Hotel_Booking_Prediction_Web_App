@@ -2,6 +2,7 @@
  bookings for the hotels to query from and display results to the user."""
 
 import logging.config
+import sqlite3
 import typing
 
 import flask
@@ -19,8 +20,10 @@ class Bookings(Base):
     """Creates a data model for the database to be set up for hotel bookings.
     """
 
+    # Define the table name
     __tablename__ = "bookings"
 
+    # Define the columns of the table
     id = sqlalchemy.Column(
         sqlalchemy.Integer, primary_key=True, autoincrement=True)
     hotel = sqlalchemy.Column(
@@ -46,7 +49,7 @@ class Bookings(Base):
         sqlalchemy.Integer, primary_key=False)
 
     def __repr__(self):
-        return f'<Booking {self.id}>'
+        return f"<Booking {self.id}>"
 
 
 class BookingManager:
@@ -61,9 +64,11 @@ class BookingManager:
     def __init__(self, app: typing.Optional[flask.app.Flask] = None,
                  engine_string: typing.Optional[str] = None):
         if app:
+            # If app is provided, use it to create the engine
             self.database = SQLAlchemy(app)
             self.session = self.database.session
         elif engine_string:
+            # If engine_string is provided, use it to create the engine
             engine = sqlalchemy.create_engine(engine_string)
             session_maker = sqlalchemy.orm.sessionmaker(bind=engine)
             self.session = session_maker()
@@ -75,6 +80,7 @@ class BookingManager:
         """Closes SQLAlchemy session
         Returns: None
         """
+        # Close the session
         self.session.close()
 
     def add_booking(self, hotel: int,
@@ -111,6 +117,7 @@ class BookingManager:
         Returns: None
         """
         try:
+            # Create a new booking object
             session = self.session
             booking = Bookings(hotel=hotel,
                                arrival_date_day_of_month=arrival_date_day_of_month,
@@ -124,6 +131,7 @@ class BookingManager:
                                total_of_special_requests=total_of_special_requests,
                                market_segment=market_segment)
 
+            # Add the booking to the database
             session.add(booking)
             session.commit()
             logger.info("Booking added to database.")
@@ -133,6 +141,9 @@ class BookingManager:
         except sqlalchemy.exc.OperationalError as e:
             logger.error("Error adding booking to database: %s", e)
             session.rollback()
+        except sqlite3.OperationalError as e:
+            logger.error(
+            "Error page returned. Not able to add booking to local sqlite database")
 
 
 def create_db(engine_string: str) -> None:
@@ -143,8 +154,11 @@ def create_db(engine_string: str) -> None:
     Returns: None
     """
     try:
+        # Create the database
         engine = sqlalchemy.create_engine(engine_string)
         Base.metadata.create_all(engine)
         logger.info("Database created.")
     except sqlalchemy.exc.OperationalError as e:
+        logger.error("Error creating database: %s", e)
+    except sqlite3.OperationalError as e:
         logger.error("Error creating database: %s", e)

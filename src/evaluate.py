@@ -8,14 +8,14 @@ import pickle
 
 import pandas as pd
 import sklearn.tree
-from sklearn.tree import DecisionTreeClassifier
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, classification_report,f1_score
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, classification_report, f1_score
 from sklearn.exceptions import NotFittedError
 
 logger = logging.getLogger(__name__)
 
 
-def score_model(x_test_path: typing.Union[str,pd.DataFrame], model_path: typing.Union[str,sklearn.tree.DecisionTreeClassifier],
+def score_model(x_test_path: typing.Union[str, pd.DataFrame],
+                model_path: typing.Union[str, sklearn.tree.DecisionTreeClassifier],
                 initial_features: typing.List[str]) -> pd.DataFrame:
     """
     Score the model.
@@ -24,7 +24,8 @@ def score_model(x_test_path: typing.Union[str,pd.DataFrame], model_path: typing.
         model_path (str/pd.DataFrame): The path or trained model object of the trained model.
         initial_features (list): The initial features.
     Returns:
-        object: The model score.
+        ypred_proba_test: The predicted probabilities.
+        ypred_bin_test: The predicted labels.
     """
     if isinstance(x_test_path, str):
         try:
@@ -67,12 +68,9 @@ def score_model(x_test_path: typing.Union[str,pd.DataFrame], model_path: typing.
         logger.error("Error: %s", err)
         raise err
 
-    except Exception as err:
-        logger.error("Error: %s", err)
-        raise err
-
     # Return the model score
     return pd.DataFrame(ypred_proba_test), pd.DataFrame(ypred_bin_test)
+
 
 def evaluate_model(y_test_path: str, ypred_proba_path: str,
                    ypred_bin_path: str) -> None:
@@ -103,7 +101,8 @@ def evaluate_model(y_test_path: str, ypred_proba_path: str,
     if isinstance(ypred_proba_path, str):
         try:
             # Load the predicted probabilities
-            logger.info("Loading the predicted probabilities from %s", ypred_proba_path)
+            logger.info(
+                "Loading the predicted probabilities from %s", ypred_proba_path)
             ypred_proba = pd.read_csv(ypred_proba_path)
         except FileNotFoundError as err:
             logger.error("Error: The file %s does not exist", ypred_proba_path)
@@ -140,7 +139,7 @@ def evaluate_model(y_test_path: str, ypred_proba_path: str,
         logger.info(pd.DataFrame(confusion,
                                  index=["Actual negative", "Actual positive"],
                                  columns=["Predicted negative", "Predicted positive"]))
-        return auc,accuracy,f1_scr
+        return auc, accuracy, f1_scr
 
     # Catch all exceptions
     except ValueError as err:
@@ -149,42 +148,3 @@ def evaluate_model(y_test_path: str, ypred_proba_path: str,
     except TypeError as err:
         logger.error("Error: %s", err)
         raise err
-    except Exception as err:
-        logger.error("Error: %s", err)
-        raise err
-
-
-
-
-def evaluate(x_test, ytest,dt_model_path,initial_features):
-    """
-    Evaluate the model.
-    Args:
-        x_test (pd.DataFrame): The testing features.
-        ytest (pd.Series): The testing labels.
-        dt_model_path (str): The path to the trained model.
-    Returns:
-        object: The model score.
-    """
-    try:
-        # Load the model
-        with open(dt_model_path, "rb") as file_handle:
-            dtree = pickle.load(file_handle)
-
-        # Get the model score
-        ypred_proba_test, ypred_bin_test = score_model(
-            x_test, dtree, initial_features)
-        auc, accuracy, f1_scr = evaluate_model(ytest, ypred_proba_test, ypred_bin_test)
-
-    # Catch all exceptions
-    except ValueError as err:
-        logger.error("Error: %s", err)
-        raise err
-    except TypeError as err:
-        logger.error("Error: %s", err)
-        raise err
-    except Exception as err:
-        logger.error("Error: %s", err)
-        raise err
-
-    return auc, accuracy, f1_scr
