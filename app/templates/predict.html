@@ -1,0 +1,120 @@
+<html lang="en"></html>
+  <head>
+    <!-- Required meta tags -->
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      h1 {
+        text-align: left;
+        color: #abeedc;
+        font-size: 40px;
+      }
+
+      h2 {
+        text-align: left;
+        color: #f8d2dd;
+        font-size: 30px;
+      }
+      p {
+      text-align: left;
+      font-weight: bold;
+      color: #c1c5d0;
+      font-size: 20px;
+      }
+      div {text-align: left}
+      body {
+        background-image: url("https://images.unsplash.com/photo-1556174645-bf4175d73e89?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80");
+        background-position: left;
+        background-repeat: no-repeat;
+        background-size: cover;
+      }
+      a {
+            text-align: left;
+            font-weight: bold;
+            color: #1f172e;
+            font-size: 20px;
+          }
+      table, th, td {
+        border: 1px solid;
+        }
+      table {
+          border-collapse: collapse;
+          border: 2px solid;
+          width: 100%;
+          color: #c1c5d0;
+          font-family: monaco; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px;
+          font-size: 20px;
+          opacity: 1.0;
+          text-align: center;
+          padding: 15px;
+        }
+      tr:hover {background-color: #1f172e;}
+      th {background-color: #1f172e;}
+    </style>
+
+    <link href="static/basic.css" rel="stylesheet">
+
+    <title>Prediction Results</title>
+  </head>
+<html lang="en">
+    <body>
+        <h1>Prediction Results for the Booking</h1>
+    
+        <hr/>
+    
+        <h2>
+          Probability of Booking Cancellation: {{ prediction_prob }}
+        </h2>
+    
+        <p>
+          Conclusion: {{ prediction }}.
+
+          Booking saved to database.
+        </p>
+      
+        <br/>
+        
+        <p>
+          Recent Bookings:
+        </p>
+        <br/>
+        <table class="center">
+          <thead>
+             <tr>
+                <th>Hotel Type</th>
+                <th>Arrival Day</th>
+                <th>Arrival Week</th>
+                <th>Reservation Day</th>
+                <th>Reservation Month</th>
+                <th>Reservation Weekday</th>
+                <th>Lead Time</th>
+                <th>Stays on Weekday</th>
+                <th>Stays on Weekend</th>
+                <th>Number of Special Requests</th>
+                <th>Market Segment</th>
+             </tr>
+          </thead>
+          <tbody>
+             {% for response in responses %}
+                <tr>
+                    <td>{{ response.hotel}}</td>
+                    <td>{{ response.arrival_date_day_of_month }}</td>
+                    <td>{{ response.arrival_date_week_number }}</td>
+                    <td>{{ response.reservation_day }}</td>
+                    <td>{{ response.reservation_month }}</td>
+                    <td>{{ response.reservation_weekday }}</td>
+                    <td>{{ response.lead_time }}</td>
+                    <td>{{ response.stays_in_week_nights }}</td>
+                    <td>{{ response.stays_in_weekend_nights }}</td>
+                    <td>{{ response.total_of_special_requests}}</td>
+                    <td>{{ response.market_segment }}</td>
+                </tr>
+             {% endfor %}
+          </tbody>
+      </table>
+      <br/>
+      <div>
+        <a href="{{ url_for('index') }}" style = "text-align:center;">Return to the Main Menu to Get More Predictions</a>
+      </div>
+      </body>
+</html>

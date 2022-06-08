@@ -1,8 +1,54 @@
-@import url(http://fonts.googleapis.com/css?family=Open+Sans:400,700,600);
 
+head{
+  margin: 25px;
+  background-color: #871F78;
+  font-family: arial, sans-serif;
+  font-size: 14px;
+
+
+}
 body {
   height: 100%;
   -webkit-font-smoothing: antialiased;
-  font-family: 'Open Sans', sans-serif;
-  background-color:#cdced8;
+  font-family: Didot;
+  background-image: url('https://images.unsplash.com/photo-1517840901100-8179e982acb7?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2670&q=80');
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  font-size: 30px;
+  color: #c1c5d0;
+  padding: 25px;
+}
+
+h3{
+  text-align: center;
+  font-family: monaco; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px;
+  font-size: 60px;
+  color: #abeedc;
+  opacity: 1.0;
+  padding: 25px;
+}
+
+h4{
+  text-align: center;
+  font-family: monaco; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px;
+  font-size: 40px;
+  color: #f8d2dd;
+  opacity: 1.0;
+  padding: 25px;
+}
+
+br{
+  font-family:  monaco; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px;
+  font-size: 20px;
+  color: #c1c5d0;
+  opacity: 1.0;
+}
+
+a {
+  text-decoration: none;
+  color: #c1c5d0;
+  font-family: monaco; font-size: 14px; font-style: normal; font-variant: normal; font-weight: 700; line-height: 15.4px;
+  font-size: 30px;
+  opacity: 1.0;
 }

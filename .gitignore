@@ -3,6 +3,7 @@ __pycache__/
 *.py[cod]
 *.class
 .DS_Store
+.vscode/
 .idea/
 .log
 .ipynb_checkpoints/
@@ -13,3 +14,5 @@ data/*
 !data/external/
 config/local/*
 !.gitkeep
+
+.mysqlconfig
