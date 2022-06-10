@@ -103,17 +103,18 @@ def add_entry():
 
             booking_df = pd.DataFrame(booking_dict, index=[0])
             if booking_df['hotel'][0] == 'City Hotel':
-                booking_df['hotel'] = 1
+                booking_df['hotel'] = int(1)
+                hotel_no = 1
             else:
-                booking_df['hotel'] = 0
-
+                booking_df['hotel'] = int(0)
+                hotel_no = 0
             prediction, prediction_prob = predict(
                 booking_df, **cfg['predict']['predict'])
 
             logger.debug(prediction)
             logger.debug(prediction_prob)
 
-            booking_manager.add_booking(hotel=booking_df['hotel'][0],
+            booking_manager.add_booking(hotel=hotel_no,
                                         arrival_date_day_of_month=request.form['arrival_day_of_month'],
                                         arrival_date_week_number=request.form['arrival_week_number'],
                                         reservation_day=request.form['reservation_day'],
