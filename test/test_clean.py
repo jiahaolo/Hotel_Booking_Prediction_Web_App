@@ -35,6 +35,15 @@ def test_delete_duplicates_non_df():
     with pytest.raises(TypeError):
         delete_duplicates(df_in)
 
+def test_delete_duplicates_empty_df():
+    """
+    Unhappy path: Tests the delete_duplicates function with an empty dataframe.
+    """
+
+    df_in = pd.DataFrame()
+
+    assert df_in.equals(delete_duplicates(df_in))
+
 
 def test_fill_missing_values():
     """
@@ -60,6 +69,14 @@ def test_fill_mising_values_non_missing_values():
 
     df_out = fill_missing_values(df_in)
     assert df_out.equals(df_true)
+
+def test_fill_mising_values_empty_df():
+    """
+    Unhappy path: Tests the fill_missing_values function with an empty dataframe.
+    """
+    df_in = pd.DataFrame()
+    df_out = fill_missing_values(df_in)
+    assert df_out.equals(df_in)
 
 
 def test_drop_error_rows():
@@ -90,14 +107,22 @@ def test_drop_error_rows_wrong_columns():
     with pytest.raises(KeyError):
         drop_error_rows(df_in)
 
+def test_drop_error_rows_empty_df():
+    """
+    Unhappy path: Tests the drop_error_rows function with empty dataframe.
+    """
+    df_in = pd.DataFrame()
+    with pytest.raises(KeyError):
+        drop_error_rows(df_in)
+
 
 def test_get_datetime_features():
     """
     Happy path: Tests the get_datetime_features function.
     """
     df_in = pd.DataFrame({'reservation_status_date': [
-                         "7/1/2005", "7/15/2005", "7/30/2005"]})
-    df_true = pd.DataFrame({'reservation_status_date': [pd.to_datetime("7/1/2005"), pd.to_datetime("7/15/2005"), pd.to_datetime("7/30/2005")],
+                         '7/1/2005', '7/15/2005', '7/30/2005']})
+    df_true = pd.DataFrame({'reservation_status_date': [pd.to_datetime('7/1/2005'), pd.to_datetime('7/15/2005'), pd.to_datetime('7/30/2005')],
                             'year': [2005, 2005, 2005],
                             'month': [7, 7, 7],
                             'day': [1, 15, 30],
@@ -110,9 +135,18 @@ def test_get_datetime_features_non_dt_columns():
     """
     Unhappy path: Tests the get_datetime_features function with non-datetime columns.
     """
-    df_in = pd.DataFrame({'reservation_status_date': ["A", "B", "C"]})
+    df_in = pd.DataFrame({'reservation_status_date': ['A', 'B', 'C']})
 
     with pytest.raises(ValueError):
+        get_datetime_features(df_in)
+
+def test_get_datetime_features_empty_df():
+    """
+    Unhappy path: Tests the get_datetime_features function with empty dataframe.
+    """
+    df_in = pd.DataFrame()
+
+    with pytest.raises(KeyError):
         get_datetime_features(df_in)
 
 
@@ -137,6 +171,14 @@ def test_label_encoding_wrong_data_type():
     with pytest.raises(TypeError):
         label_encoding(df_in)
 
+def test_label_encoding_empty_df():
+    """
+    Unhappy path: Tests the test_label_encoding function with empty dataframe.
+    """
+    df_in = pd.DataFrame()
+
+    with pytest.raises(KeyError):
+        label_encoding(df_in)
 
 def test_log_transform():
     """
@@ -160,6 +202,15 @@ def test_log_transform_wrong_data_type():
     with pytest.raises(KeyError):
         log_transform(df_in)
 
+def test_log_transform_wrong_empty_df():
+    """
+    Unhappy path: Tests the log_transform function with empty dataframe.
+    """
+    df_in = pd.DataFrame()
+
+    with pytest.raises(KeyError):
+        log_transform(df_in)
+
 
 def test_drop_columns():
     """
@@ -179,4 +230,14 @@ def test_drop_columns_wrong_data_type():
     df_in = 64
 
     with pytest.raises(TypeError):
+        drop_columns(df_in, ['b'])
+
+
+def test_drop_columns_empty_dataframe():
+    """
+    Unhappy path: Tests the drop_columns function with empty dataframe
+    """
+    df_in = pd.DataFrame()
+
+    with pytest.raises(KeyError):
         drop_columns(df_in, ['b'])
