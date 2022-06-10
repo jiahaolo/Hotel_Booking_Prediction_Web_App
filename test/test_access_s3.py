@@ -27,3 +27,21 @@ def test_parse_s3_invalid_path():
 
     with pytest.raises(AttributeError):
         parse_s3(path_in)
+
+def test_parse_s3_none():
+    """
+    Sad path: Tests the parse_s3 function with None data type.
+    """
+    path_in = None
+
+    with pytest.raises(TypeError):
+        parse_s3(path_in)
+
+def test_parse_s3_int():
+    """
+    Sad path: Tests the parse_s3 function with int data type.
+    """
+    path_in = 456
+
+    with pytest.raises(TypeError):
+        parse_s3(path_in)

@@ -610,6 +610,14 @@ def test_score_model_with_wrong_type():
     with pytest.raises(FileNotFoundError):
         score_model(X_test, model_in, initial_features)
 
+def test_score_model_with_empty_dataframe():
+    """
+    Sad path: Tests the score_model function with empty dataframe.
+    """
+    df_empty = pd.DataFrame()
+    with pytest.raises(KeyError):
+        score_model(df_empty, dtree, initial_features)
+
 def test_evaluate_model():
     """
     Happy path: Tests the evaluate_model function.
@@ -628,3 +636,11 @@ def test_evaluate_model_with_single_type():
     y_test_in = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
     with pytest.raises(TypeError):
         evaluate_model(y_test_in, ypred_proba_true, ypred_true)
+
+def test_evaluate_model_with_empty_dd():
+    """
+    Sad path: Tests the evaluate_model function with empty dataframe.
+    """
+    df_empty = pd.DataFrame()
+    with pytest.raises(ValueError):
+        evaluate_model(df_empty, ypred_proba_true, ypred_true)

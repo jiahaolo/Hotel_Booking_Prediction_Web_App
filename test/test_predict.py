@@ -60,3 +60,12 @@ def test_predict_wrong_columns():
 
     with pytest.raises(KeyError):
         predict(x_test_wrong, 'models/dt_model.pkl')
+
+def test_predict_empty_df():
+    """
+    Sad path: Test the predict function with empty dataframe.
+    """
+    x_test_wrong = pd.DataFrame()
+
+    with pytest.raises(KeyError):
+        predict(x_test_wrong, 'models/dt_model.pkl')

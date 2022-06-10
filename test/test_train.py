@@ -603,11 +603,19 @@ def test_train_test_split_data():
 
 def test_train_test_split_wrong_data_type():
     """
-    Test the train_test_split_data function with wrong data type.
+    Unhappy path: Test the train_test_split_data function with wrong data type.
     """
     target_wrong = 64
     with pytest.raises(TypeError):
         train_test_split_data(df_in, target_wrong , test_size=0.2, random_state=42)
+
+def test_train_test_split_empty_df():
+    """
+    Unhappy path: Test the train_test_split_data function with empty dataframe.
+    """
+    df_empty = pd.DataFrame()
+    with pytest.raises(KeyError):
+        train_test_split_data(df_empty, 'is_canceled' , test_size=0.2, random_state=42)
 
 def test_train_dt_model():
     """
@@ -617,3 +625,19 @@ def test_train_dt_model():
     model = train_dt_model(x_train_true, y_train_true,initial_features)
     assert isinstance(model, DecisionTreeClassifier)
     assert getattr(model, 'random_state') == r_s
+
+def test_train_dt_model_no_features():
+    """
+    Unhappy path: Test the train_dt_model function without features.
+    """
+    df_empty = pd.DataFrame()
+    with pytest.raises(ValueError):
+        train_dt_model(x_train_true, y_train_true,df_empty)
+
+def test_train_dt_model_no_labels():
+    """
+    Unhappy path: Test the train_dt_model function without labels.
+    """
+    df_empty = pd.DataFrame()
+    with pytest.raises(ValueError):
+        train_dt_model(x_train_true, df_empty,initial_features)
